@@ -76,7 +76,9 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        if (jwtSecret != null && !jwtSecret.isBlank()) {
+        if (jwksUrl != null && !jwksUrl.isBlank()) {
+            return NimbusJwtDecoder.withJwkSetUri(jwksUrl).build();
+        } else if (jwtSecret != null && !jwtSecret.isBlank()) {
             byte[] keyBytes;
             try {
                 // Supabase JWT secret is base64-encoded (or standard UTF-8)
@@ -86,8 +88,6 @@ public class SecurityConfig {
             }
             SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
             return NimbusJwtDecoder.withSecretKey(secretKey).build();
-        } else if (jwksUrl != null && !jwksUrl.isBlank()) {
-            return NimbusJwtDecoder.withJwkSetUri(jwksUrl).build();
         } else {
             // Fallback mock decoder for dev/tests
             SecretKeySpec secretKey = new SecretKeySpec("01234567890123456789012345678901".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
