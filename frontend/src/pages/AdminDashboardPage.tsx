@@ -112,7 +112,10 @@ export const AdminDashboardPage: React.FC = () => {
       setTimeout(() => setCompanySuccessMsg(''), 4000);
     },
     onError: (err: any) => {
-      const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to add company. Please verify your connection and permissions.';
+      let msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to add company. Please verify your connection and permissions.';
+      if (err.response?.status === 405) {
+        msg = 'Error 405: VITE_API_BASE_URL is not set in Vercel. Requests are hitting Vercel static hosting instead of your Render backend. Set VITE_API_BASE_URL in Vercel settings and redeploy.';
+      }
       setCompanyErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
     },
   });
