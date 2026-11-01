@@ -21,6 +21,7 @@ export const RecruiterDashboardPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [skills, setSkills] = useState('');
   const [postSuccess, setPostSuccess] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
 
   // Fetch companies
   const { data: companies } = useQuery<Company[]>({
@@ -60,10 +61,24 @@ export const RecruiterDashboardPage: React.FC = () => {
     },
     onSuccess: () => {
       setPostSuccess(true);
+      setPostError(null);
       setTitle('');
       setDescription('');
       setSkills('');
-      setTimeout(() => setPostSuccess(false), 3000);
+      setTimeout(() => setPostSuccess(false), 4000);
+    },
+    onError: (err: any) => {
+      console.error('Job publication error:', err);
+      let msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to publish vacancy.';
+      if (err.response?.status === 405) {
+        msg = 'Error 405: VITE_API_BASE_URL is not configured in Vercel settings. Calls are hitting Vercel static router instead of your Render backend API.';
+      } else if (err.response?.status === 403) {
+        msg = 'Error 403: Forbidden. You do not have Recruiter or Admin permissions to publish vacancies.';
+      } else if (err.response?.data?.validationErrors) {
+        const details = Object.entries(err.response.data.validationErrors).map(([k, v]) => `${k}: ${v}`).join(', ');
+        msg = `Validation failed: ${details}`;
+      }
+      setPostError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     },
   });
 
@@ -190,6 +205,13 @@ export const RecruiterDashboardPage: React.FC = () => {
             <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl flex items-center gap-2">
               <CheckCircle className="w-4 h-4 shrink-0" />
               <span>Job opening successfully posted and published!</span>
+            </div>
+          )}
+
+          {postError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+              <span className="font-bold">Error:</span>
+              <span>{postError}</span>
             </div>
           )}
 
