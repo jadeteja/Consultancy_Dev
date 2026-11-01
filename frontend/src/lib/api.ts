@@ -21,3 +21,14 @@ apiClient.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const authHeader = error.response.headers['www-authenticate'];
+      console.error('[API 401 Auth Error]:', authHeader || error.response.data || error.message);
+    }
+    return Promise.reject(error);
+  }
+);
