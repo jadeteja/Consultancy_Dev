@@ -84,24 +84,17 @@ public class SecurityConfig {
                 && supabaseUrl != null && !supabaseUrl.isBlank() && !supabaseUrl.contains("xyzcompany.supabase.co")) {
             effectiveJwksUrl = supabaseUrl.replaceAll("/+$", "") + "/auth/v1/.well-known/jwks.json";
         }
-
-        if (effectiveJwksUrl != null && !effectiveJwksUrl.isBlank() && !effectiveJwksUrl.contains("xyzcompany.supabase.co")) {
-            return NimbusJwtDecoder.withJwkSetUri(effectiveJwksUrl).build();
-        } else if (jwtSecret != null && !jwtSecret.isBlank()) {
-            byte[] keyBytes;
-            try {
-                // Supabase JWT secret is base64-encoded (or standard UTF-8)
-                keyBytes = java.util.Base64.getDecoder().decode(jwtSecret.trim());
-            } catch (IllegalArgumentException e) {
-                keyBytes = jwtSecret.trim().getBytes(StandardCharsets.UTF_8);
-            }
-            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
-            return NimbusJwtDecoder.withSecretKey(secretKey).build();
-        } else {
-            // Fallback to configured or direct project URL if available
-            String fallbackJwks = "https://jgdtzkfwymrgzdqapkiv.supabase.co/auth/v1/.well-known/jwks.json";
-            return NimbusJwtDecoder.withJwkSetUri(fallbackJwks).build();
+        if (effectiveJwksUrl == null || effectiveJwksUrl.isBlank() || effectiveJwksUrl.contains("xyzcompany.supabase.co")) {
+            effectiveJwksUrl = "https://jgdtzkfwymrgzdqapkiv.supabase.co/auth/v1/.well-known/jwks.json";
         }
+
+        // Supabase signs tokens with ES256 (as well as RS256)
+        return NimbusJwtDecoder.withJwkSetUri(effectiveJwksUrl)
+                .jwsAlgorithms(algorithms -> {
+                    algorithms.add(org.springframework.security.oauth2.jose.jws.SignatureAlgorithm.ES256);
+                    algorithms.add(org.springframework.security.oauth2.jose.jws.SignatureAlgorithm.RS256);
+                })
+                .build();
     }
 
     @Bean
