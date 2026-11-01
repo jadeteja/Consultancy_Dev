@@ -77,7 +77,14 @@ public class SecurityConfig {
     @Bean
     public JwtDecoder jwtDecoder() {
         if (jwtSecret != null && !jwtSecret.isBlank()) {
-            SecretKeySpec secretKey = new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            byte[] keyBytes;
+            try {
+                // Supabase JWT secret is base64-encoded (or standard UTF-8)
+                keyBytes = java.util.Base64.getDecoder().decode(jwtSecret.trim());
+            } catch (IllegalArgumentException e) {
+                keyBytes = jwtSecret.trim().getBytes(StandardCharsets.UTF_8);
+            }
+            SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
             return NimbusJwtDecoder.withSecretKey(secretKey).build();
         } else if (jwksUrl != null && !jwksUrl.isBlank()) {
             return NimbusJwtDecoder.withJwkSetUri(jwksUrl).build();
