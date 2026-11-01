@@ -70,7 +70,7 @@ export const Navbar: React.FC = () => {
                   Admin Panel
                 </Link>
               )}
-              {hasRole('ROLE_RECRUITER') && (
+              {(hasRole('ROLE_RECRUITER') || hasRole('ROLE_SUPER_ADMIN')) && (
                 <Link
                   to="/recruiter"
                   className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-blue-50 text-[#0866D9] hover:bg-blue-100 transition-colors"
@@ -154,13 +154,13 @@ export const Navbar: React.FC = () => {
                     Admin Panel
                   </Link>
                 )}
-                {hasRole('ROLE_RECRUITER') && (
+                {(hasRole('ROLE_RECRUITER') || hasRole('ROLE_SUPER_ADMIN')) && (
                   <Link
                     to="/recruiter"
                     onClick={() => setMobileMenuOpen(false)}
                     className="w-full text-center py-2.5 px-4 rounded-lg bg-blue-50 text-[#0866D9] font-semibold text-sm hover:bg-blue-100 transition-colors"
                   >
-                    Recruiter Desk
+                    Recruiter Desk (Post Jobs)
                   </Link>
                 )}
                 <Link

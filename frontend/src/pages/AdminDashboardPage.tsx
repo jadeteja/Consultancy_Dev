@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Shield, Users, Briefcase, FileText, Settings, UserPlus, CheckCircle, BarChart3 } from 'lucide-react';
+import { Shield, Users, Briefcase, FileText, Settings, UserPlus, CheckCircle, BarChart3, PlusCircle } from 'lucide-react';
 import { apiClient } from '../lib/api';
 import type { Company, SiteSettings, ApplicationRecord } from '../types';
 
@@ -129,6 +130,15 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold">Next step solutions Master Administration</h1>
           <p className="text-xs text-blue-100 mt-1">Full control over recruiters, companies, live jobs, and system configurations</p>
+          <div className="mt-3">
+            <Link
+              to="/recruiter"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-[#0866D9] text-xs font-bold shadow-xs hover:bg-blue-50 transition-colors"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>Post New Job (Recruiter Desk)</span>
+            </Link>
+          </div>
         </div>
 
         {/* Global Key Metrics */}
