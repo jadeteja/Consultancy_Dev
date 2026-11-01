@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-blue: #0866D9;
+  --color-dark-navy: #102A56;
+  --color-light-blue: #EAF4FF;
+  --color-brand-bg: #F7FAFF;
+  --color-whatsapp-green: #25D366;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #F7FAFF;
+  color: #1E293B;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   DESKTOP-FIRST RESPONSIVE ARCHITECTURE (Overrides only below 1280px)
+   CRITICAL REQUIREMENT: Desktop (>= 1280px) remains 100% untouched.
+   ========================================================================== */
+
+/* 1. Small laptops / compact desktops (1024px to 1279px) */
+@media screen and (min-width: 1024px) and (max-width: 1279px) {
+  .site-container {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* 2. Tablets (768px to 1023px) */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  .responsive-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 3. Large mobile devices (481px to 767px) */
+@media screen and (min-width: 481px) and (max-width: 767px) {
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+  }
+  
+  /* Ensure inputs have legible font size to prevent mobile iOS zoom */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  .responsive-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 4. Mobile devices (375px to 480px) */
+@media screen and (min-width: 375px) and (max-width: 480px) {
+  html, body {
+    overflow-x: hidden;
+  }
+
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  .responsive-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 5. Small mobile devices (max-width: 374px) */
+@media screen and (max-width: 374px) {
+  html, body {
+    overflow-x: hidden;
+  }
+
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  .responsive-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

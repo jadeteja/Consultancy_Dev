@@ -1,0 +1,67 @@
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+spring:
+  application:
+    name: careerbridge-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/careerbridge}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 20000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    show-sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+# Supabase Auth & JWT Configuration
+supabase:
+  url: ${SUPABASE_URL:https://xyzcompany.supabase.co}
+  jwt:
+    issuer: ${SUPABASE_JWT_ISSUER:https://xyzcompany.supabase.co/auth/v1}
+    jwks-url: ${SUPABASE_JWKS_URL:https://xyzcompany.supabase.co/auth/v1/.well-known/jwks.json}
+    secret: ${SUPABASE_JWT_SECRET:}
+  storage:
+    bucket: ${SUPABASE_STORAGE_BUCKET:resumes}
+
+# Application Custom Configuration
+app:
+  cors:
+    allowed-origins: ${FRONTEND_URL:http://localhost:5173,http://localhost:3000}
+  consultancy:
+    whatsapp-number: ${CONSULTANCY_WHATSAPP_NUMBER:917285927080}
+    default-admin-email: ${DEFAULT_ADMIN_EMAIL:nextstepsolutions.recruitment@gmail.com}
+
+# Actuator & OpenAPI
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
