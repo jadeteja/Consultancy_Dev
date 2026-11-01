@@ -30,5 +30,7 @@ public interface JobRepository extends JpaRepository<Job, UUID>, JpaSpecificatio
 
     long countByStatus(JobStatus status);
 
+    long countByCompanyId(UUID companyId);
+
     List<Job> findByCreatedBy(com.careerbridge.user.UserProfile user);
 }

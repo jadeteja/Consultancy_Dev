@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Shield, Users, Briefcase, FileText, Settings, UserPlus, CheckCircle, AlertCircle, BarChart3, PlusCircle } from 'lucide-react';
+import { Shield, Users, Briefcase, FileText, Settings, UserPlus, CheckCircle, AlertCircle, BarChart3, PlusCircle, Edit2, Trash2, X } from 'lucide-react';
 import { apiClient } from '../lib/api';
 import type { Company, SiteSettings, ApplicationRecord } from '../types';
 
@@ -65,13 +65,14 @@ export const AdminDashboardPage: React.FC = () => {
     },
   });
 
-  // Company creation state
+  // Company creation & editing state
   const [newCompanyName, setNewCompanyName] = useState('');
   const [newCompanyIndustry, setNewCompanyIndustry] = useState('');
   const [newCompanyHq, setNewCompanyHq] = useState('');
   const [newCompanyLogo, setNewCompanyLogo] = useState('');
   const [companySuccessMsg, setCompanySuccessMsg] = useState('');
   const [companyErrorMsg, setCompanyErrorMsg] = useState('');
+  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
 
   const createCompanyMutation = useMutation({
     mutationFn: async () => {
@@ -119,6 +120,78 @@ export const AdminDashboardPage: React.FC = () => {
       setCompanyErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
     },
   });
+
+  const updateCompanyMutation = useMutation({
+    mutationFn: async () => {
+      if (!editingCompany) return;
+      setCompanyErrorMsg('');
+      setCompanySuccessMsg('');
+
+      let cleanLogo = newCompanyLogo.trim();
+      if (cleanLogo && !cleanLogo.startsWith('http://') && !cleanLogo.startsWith('https://')) {
+        cleanLogo = `https://${cleanLogo}`;
+      }
+
+      const payload = {
+        name: newCompanyName.trim(),
+        industry: newCompanyIndustry.trim() || undefined,
+        headquarters: newCompanyHq.trim() || undefined,
+        logoUrl: cleanLogo || undefined,
+      };
+
+      const res = await apiClient.put(`/companies/${editingCompany.id}`, payload);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      setCompanySuccessMsg(`Company "${data.name || newCompanyName}" updated successfully!`);
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+      cancelEditingCompany();
+      setTimeout(() => setCompanySuccessMsg(''), 4000);
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to update company.';
+      setCompanyErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    },
+  });
+
+  const deleteCompanyMutation = useMutation({
+    mutationFn: async (companyId: string) => {
+      setCompanyErrorMsg('');
+      setCompanySuccessMsg('');
+      const res = await apiClient.delete(`/companies/${companyId}`);
+      return res.data;
+    },
+    onSuccess: (data) => {
+      setCompanySuccessMsg(data.message || 'Company deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
+      if (editingCompany) {
+        cancelEditingCompany();
+      }
+      setTimeout(() => setCompanySuccessMsg(''), 4000);
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to delete company.';
+      setCompanyErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    },
+  });
+
+  const startEditingCompany = (c: Company) => {
+    setEditingCompany(c);
+    setNewCompanyName(c.name || '');
+    setNewCompanyIndustry(c.industry || '');
+    setNewCompanyHq(c.headquarters || '');
+    setNewCompanyLogo(c.logoUrl || '');
+    setCompanyErrorMsg('');
+    setCompanySuccessMsg('');
+  };
+
+  const cancelEditingCompany = () => {
+    setEditingCompany(null);
+    setNewCompanyName('');
+    setNewCompanyIndustry('');
+    setNewCompanyHq('');
+    setNewCompanyLogo('');
+  };
 
   // Settings update state
   const [whatsappNumber, setWhatsappNumber] = useState('');
@@ -351,7 +424,21 @@ export const AdminDashboardPage: React.FC = () => {
       {activeTab === 'companies' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Add Partner Corporate</h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-bold text-slate-900">
+                {editingCompany ? 'Edit Partner Corporate' : 'Add Partner Corporate'}
+              </h3>
+              {editingCompany && (
+                <button
+                  type="button"
+                  onClick={cancelEditingCompany}
+                  className="text-xs text-slate-400 hover:text-slate-700 flex items-center gap-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Cancel</span>
+                </button>
+              )}
+            </div>
 
             {companySuccessMsg && (
               <div className="p-3 bg-emerald-50 text-emerald-700 text-xs rounded-xl flex items-center gap-2">
@@ -371,12 +458,16 @@ export const AdminDashboardPage: React.FC = () => {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!newCompanyName.trim()) return;
-                createCompanyMutation.mutate();
+                if (editingCompany) {
+                  updateCompanyMutation.mutate();
+                } else {
+                  createCompanyMutation.mutate();
+                }
               }}
               className="space-y-3"
             >
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Company Name</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Company Name *</label>
                 <input
                   type="text"
                   required
@@ -416,17 +507,33 @@ export const AdminDashboardPage: React.FC = () => {
                   className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0866D9]/20 focus:border-[#0866D9]"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={createCompanyMutation.isPending || !newCompanyName.trim()}
-                className="w-full py-2.5 bg-[#0866D9] text-white font-semibold text-xs rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
-              >
-                {createCompanyMutation.isPending ? (
-                  <span>Adding Company...</span>
-                ) : (
-                  <span>Add Company</span>
+              <div className="flex gap-2 pt-1">
+                <button
+                  type="submit"
+                  disabled={
+                    (editingCompany ? updateCompanyMutation.isPending : createCompanyMutation.isPending) ||
+                    !newCompanyName.trim()
+                  }
+                  className="flex-1 py-2.5 bg-[#0866D9] text-white font-semibold text-xs rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {editingCompany ? (
+                    updateCompanyMutation.isPending ? 'Updating...' : 'Save Changes'
+                  ) : createCompanyMutation.isPending ? (
+                    'Adding Company...'
+                  ) : (
+                    'Add Company'
+                  )}
+                </button>
+                {editingCompany && (
+                  <button
+                    type="button"
+                    onClick={cancelEditingCompany}
+                    className="px-3 py-2.5 border border-slate-200 text-slate-600 font-semibold text-xs rounded-xl hover:bg-slate-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
                 )}
-              </button>
+              </div>
             </form>
           </div>
 
@@ -436,25 +543,59 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
             <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {companies?.map((c) => (
-                <div key={c.id} className="p-3 border border-slate-100 rounded-xl flex items-center gap-3">
-                  {c.logoUrl ? (
-                    <img
-                      src={c.logoUrl}
-                      alt={c.name}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.style.display = 'none';
-                      }}
-                      className="w-10 h-10 object-contain shrink-0 rounded"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded bg-blue-50 text-[#0866D9] flex items-center justify-center font-bold text-xs shrink-0">
-                      {c.name.slice(0, 2).toUpperCase()}
+                <div
+                  key={c.id}
+                  className={`p-3 border rounded-xl flex items-center justify-between gap-3 transition-colors ${
+                    editingCompany?.id === c.id ? 'border-[#0866D9] bg-blue-50/30' : 'border-slate-100 bg-white hover:border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {c.logoUrl ? (
+                      <img
+                        src={c.logoUrl}
+                        alt={c.name}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.style.display = 'none';
+                        }}
+                        className="w-10 h-10 object-contain shrink-0 rounded bg-white p-0.5 border border-slate-100"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded bg-blue-50 text-[#0866D9] flex items-center justify-center font-bold text-xs shrink-0">
+                        {c.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h4 className="font-semibold text-xs text-slate-900 truncate">{c.name}</h4>
+                      <span className="text-[10px] text-slate-500 block truncate">{c.industry || 'Corporate'}</span>
+                      {c.headquarters && (
+                        <span className="text-[10px] text-slate-400 block truncate">{c.headquarters}</span>
+                      )}
                     </div>
-                  )}
-                  <div className="min-w-0">
-                    <h4 className="font-semibold text-xs text-slate-900 truncate">{c.name}</h4>
-                    <span className="text-[10px] text-slate-500 block truncate">{c.industry || 'Corporate'}</span>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => startEditingCompany(c)}
+                      title="Edit Company"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-[#0866D9] hover:bg-blue-50 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to delete "${c.name}"?`)) {
+                          deleteCompanyMutation.mutate(c.id);
+                        }
+                      }}
+                      title="Delete Company"
+                      disabled={deleteCompanyMutation.isPending}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               ))}
