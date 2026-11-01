@@ -56,6 +56,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/job-categories").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/site-settings/public").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/applications/guest-intent").permitAll()
+                // Company creation by authorized staff
+                .requestMatchers(HttpMethod.POST, "/api/v1/companies").hasAnyRole("RECRUITER", "SUPER_ADMIN")
                 // Role-specific protected endpoints
                 .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/recruiter/**").hasAnyRole("RECRUITER", "SUPER_ADMIN")
@@ -94,7 +96,12 @@ public class SecurityConfig {
                 .filter(s -> !s.isEmpty())
                 .toList();
 
-        config.setAllowedOrigins(origins);
+        List<String> patterns = new java.util.ArrayList<>(origins);
+        patterns.add("https://*.vercel.app");
+        patterns.add("http://localhost:*");
+        patterns.add("http://127.0.0.1:*");
+
+        config.setAllowedOriginPatterns(patterns);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         config.setAllowCredentials(true);

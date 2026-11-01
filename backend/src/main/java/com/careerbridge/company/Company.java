@@ -27,10 +27,10 @@ public class Company {
     @Column(nullable = false, unique = true, length = 200)
     private String slug;
 
-    @Column(name = "logo_url", length = 500)
+    @Column(name = "logo_url", columnDefinition = "TEXT")
     private String logoUrl;
 
-    @Column(name = "website_url", length = 255)
+    @Column(name = "website_url", columnDefinition = "TEXT")
     private String websiteUrl;
 
     @Column(columnDefinition = "TEXT")

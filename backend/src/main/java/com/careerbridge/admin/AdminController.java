@@ -91,11 +91,55 @@ public class AdminController {
     }
 
     @PostMapping("/companies")
-    public ResponseEntity<Company> createCompany(@Valid @RequestBody Company company) {
-        if (company.getSlug() == null || company.getSlug().isBlank()) {
-            company.setSlug(company.getName().toLowerCase().replaceAll("[^a-z0-9]+", "-"));
+    public ResponseEntity<?> createCompany(@RequestBody Company company) {
+        if (company.getName() == null || company.getName().trim().isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Company name is required."));
         }
-        return ResponseEntity.ok(companyRepository.save(company));
+
+        String trimmedName = company.getName().trim();
+        company.setName(trimmedName);
+
+        if (companyRepository.existsByName(trimmedName)) {
+            return ResponseEntity.badRequest().body(Map.of("message", "A company with the name '" + trimmedName + "' already exists."));
+        }
+
+        // Generate and ensure unique slug
+        String baseSlug = (company.getSlug() != null && !company.getSlug().trim().isBlank())
+                ? company.getSlug().trim().toLowerCase().replaceAll("[^a-z0-9]+", "-")
+                : trimmedName.toLowerCase().replaceAll("[^a-z0-9]+", "-");
+        baseSlug = baseSlug.replaceAll("^-+|-+$", "");
+        if (baseSlug.isBlank()) {
+            baseSlug = "company-" + UUID.randomUUID().toString().substring(0, 8);
+        }
+
+        String candidateSlug = baseSlug;
+        int counter = 1;
+        while (companyRepository.findBySlug(candidateSlug).isPresent()) {
+            candidateSlug = baseSlug + "-" + counter++;
+        }
+        company.setSlug(candidateSlug);
+
+        // Sanitize optional fields
+        if (company.getIndustry() != null && company.getIndustry().trim().isBlank()) {
+            company.setIndustry(null);
+        } else if (company.getIndustry() != null) {
+            company.setIndustry(company.getIndustry().trim());
+        }
+
+        if (company.getHeadquarters() != null && company.getHeadquarters().trim().isBlank()) {
+            company.setHeadquarters(null);
+        } else if (company.getHeadquarters() != null) {
+            company.setHeadquarters(company.getHeadquarters().trim());
+        }
+
+        if (company.getLogoUrl() != null && company.getLogoUrl().trim().isBlank()) {
+            company.setLogoUrl(null);
+        } else if (company.getLogoUrl() != null) {
+            company.setLogoUrl(company.getLogoUrl().trim());
+        }
+
+        Company saved = companyRepository.save(company);
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/applications")

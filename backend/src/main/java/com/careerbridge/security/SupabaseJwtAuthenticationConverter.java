@@ -28,8 +28,16 @@ public class SupabaseJwtAuthenticationConverter implements Converter<Jwt, Abstra
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    @Value("${app.consultancy.default-admin-email:nextstepsolutions.recruitment@gmail.com}")
-    private String defaultAdminEmail;
+    @Value("${app.consultancy.admin-emails:${app.consultancy.default-admin-email:nextstepsolutions.recruitment@gmail.com,Jade.teja@gmail.com,teja.jade@gmail.com}}")
+    private String adminEmails;
+
+    private boolean isSuperAdminEmail(String email) {
+        if (email == null) return false;
+        return Arrays.stream(adminEmails.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .anyMatch(e -> e.equalsIgnoreCase(email.trim()));
+    }
 
     @Override
     @Transactional
@@ -71,7 +79,7 @@ public class SupabaseJwtAuthenticationConverter implements Converter<Jwt, Abstra
                     .build();
 
             // Default role is CANDIDATE unless matching configured bootstrap admin email
-            if (finalEmail != null && finalEmail.equalsIgnoreCase(defaultAdminEmail)) {
+            if (isSuperAdminEmail(finalEmail)) {
                 Role adminRole = roleRepository.findByName(RoleType.ROLE_SUPER_ADMIN)
                         .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_SUPER_ADMIN).build()));
                 newUser.getRoles().add(adminRole);
@@ -84,8 +92,8 @@ public class SupabaseJwtAuthenticationConverter implements Converter<Jwt, Abstra
             return userRepository.save(newUser);
         });
 
-        // Ensure user whose email matches defaultAdminEmail always has ROLE_SUPER_ADMIN
-        if (finalEmail != null && finalEmail.equalsIgnoreCase(defaultAdminEmail)) {
+        // Ensure user whose email matches admin emails always has ROLE_SUPER_ADMIN
+        if (isSuperAdminEmail(finalEmail)) {
             boolean hasSuperAdmin = user.getRoles().stream()
                     .anyMatch(r -> r.getName() == RoleType.ROLE_SUPER_ADMIN);
             if (!hasSuperAdmin) {

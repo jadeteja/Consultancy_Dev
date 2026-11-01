@@ -24,8 +24,14 @@ export const LoginPage: React.FC = () => {
       setErrorMessage(error.message);
       setLoading(false);
     } else {
-      const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'nextstepsolutions.recruitment@gmail.com').toLowerCase();
-      if (email.trim().toLowerCase() === adminEmail) {
+      const knownAdmins = [
+        'nextstepsolutions.recruitment@gmail.com',
+        'jade.teja@gmail.com',
+        'teja.jade@gmail.com',
+        ...(import.meta.env.VITE_ADMIN_EMAIL ? import.meta.env.VITE_ADMIN_EMAIL.split(',') : [])
+      ].map(e => e.trim().toLowerCase());
+
+      if (knownAdmins.includes(email.trim().toLowerCase())) {
         navigate('/admin');
       } else {
         navigate('/candidate');

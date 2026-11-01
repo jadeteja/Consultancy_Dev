@@ -21,6 +21,18 @@ const AuthContext = createContext<AuthContextType>({
   hasRole: () => false,
 });
 
+const KNOWN_ADMINS = [
+  'nextstepsolutions.recruitment@gmail.com',
+  'jade.teja@gmail.com',
+  'teja.jade@gmail.com',
+  ...(import.meta.env.VITE_ADMIN_EMAIL ? import.meta.env.VITE_ADMIN_EMAIL.split(',') : [])
+].map(e => e.trim().toLowerCase());
+
+const isSuperAdminEmail = (email?: string | null) => {
+  if (!email) return false;
+  return KNOWN_ADMINS.includes(email.trim().toLowerCase());
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -32,8 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setRoles([]);
       return;
     }
-    const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'nextstepsolutions.recruitment@gmail.com').toLowerCase();
-    const isAdmin = u.email?.toLowerCase() === adminEmail;
+    const isAdmin = isSuperAdminEmail(u.email);
 
     try {
       const res = await apiClient.get('/candidate/profile');
@@ -88,8 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const hasRole = (role: string) => {
-    const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'nextstepsolutions.recruitment@gmail.com').toLowerCase();
-    if (role === 'ROLE_SUPER_ADMIN' && user?.email?.toLowerCase() === adminEmail) {
+    if (role === 'ROLE_SUPER_ADMIN' && isSuperAdminEmail(user?.email)) {
       return true;
     }
     return roles.includes(role);

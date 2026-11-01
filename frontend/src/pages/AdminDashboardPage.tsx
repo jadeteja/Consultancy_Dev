@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Shield, Users, Briefcase, FileText, Settings, UserPlus, CheckCircle, BarChart3, PlusCircle } from 'lucide-react';
+import { Shield, Users, Briefcase, FileText, Settings, UserPlus, CheckCircle, AlertCircle, BarChart3, PlusCircle } from 'lucide-react';
 import { apiClient } from '../lib/api';
 import type { Company, SiteSettings, ApplicationRecord } from '../types';
 
@@ -70,24 +70,50 @@ export const AdminDashboardPage: React.FC = () => {
   const [newCompanyIndustry, setNewCompanyIndustry] = useState('');
   const [newCompanyHq, setNewCompanyHq] = useState('');
   const [newCompanyLogo, setNewCompanyLogo] = useState('');
+  const [companySuccessMsg, setCompanySuccessMsg] = useState('');
+  const [companyErrorMsg, setCompanyErrorMsg] = useState('');
 
   const createCompanyMutation = useMutation({
     mutationFn: async () => {
+      setCompanyErrorMsg('');
+      setCompanySuccessMsg('');
+
+      let cleanLogo = newCompanyLogo.trim();
+      if (cleanLogo && !cleanLogo.startsWith('http://') && !cleanLogo.startsWith('https://')) {
+        cleanLogo = `https://${cleanLogo}`;
+      }
+
       const payload = {
-        name: newCompanyName,
-        industry: newCompanyIndustry,
-        headquarters: newCompanyHq,
-        logoUrl: newCompanyLogo,
+        name: newCompanyName.trim(),
+        industry: newCompanyIndustry.trim() || undefined,
+        headquarters: newCompanyHq.trim() || undefined,
+        logoUrl: cleanLogo || undefined,
       };
-      const res = await apiClient.post('/admin/companies', payload);
-      return res.data;
+
+      try {
+        const res = await apiClient.post('/admin/companies', payload);
+        return res.data;
+      } catch (err: any) {
+        // Fallback to /companies if /admin/companies returns 404
+        if (err.response?.status === 404) {
+          const fallbackRes = await apiClient.post('/companies', payload);
+          return fallbackRes.data;
+        }
+        throw err;
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setCompanySuccessMsg(`Company "${data.name || newCompanyName}" added successfully!`);
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       setNewCompanyName('');
       setNewCompanyIndustry('');
       setNewCompanyHq('');
       setNewCompanyLogo('');
+      setTimeout(() => setCompanySuccessMsg(''), 4000);
+    },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to add company. Please verify your connection and permissions.';
+      setCompanyErrorMsg(typeof msg === 'string' ? msg : JSON.stringify(msg));
     },
   });
 
@@ -323,7 +349,29 @@ export const AdminDashboardPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs space-y-4">
             <h3 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Add Partner Corporate</h3>
-            <form onSubmit={(e) => { e.preventDefault(); createCompanyMutation.mutate(); }} className="space-y-3">
+
+            {companySuccessMsg && (
+              <div className="p-3 bg-emerald-50 text-emerald-700 text-xs rounded-xl flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 shrink-0" />
+                <span>{companySuccessMsg}</span>
+              </div>
+            )}
+
+            {companyErrorMsg && (
+              <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{companyErrorMsg}</span>
+              </div>
+            )}
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newCompanyName.trim()) return;
+                createCompanyMutation.mutate();
+              }}
+              className="space-y-3"
+            >
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Company Name</label>
                 <input
@@ -332,7 +380,7 @@ export const AdminDashboardPage: React.FC = () => {
                   value={newCompanyName}
                   onChange={(e) => setNewCompanyName(e.target.value)}
                   placeholder="e.g. Google India"
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0866D9]/20 focus:border-[#0866D9]"
                 />
               </div>
               <div>
@@ -342,7 +390,7 @@ export const AdminDashboardPage: React.FC = () => {
                   value={newCompanyIndustry}
                   onChange={(e) => setNewCompanyIndustry(e.target.value)}
                   placeholder="e.g. Technology"
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0866D9]/20 focus:border-[#0866D9]"
                 />
               </div>
               <div>
@@ -352,25 +400,29 @@ export const AdminDashboardPage: React.FC = () => {
                   value={newCompanyHq}
                   onChange={(e) => setNewCompanyHq(e.target.value)}
                   placeholder="e.g. Hyderabad"
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0866D9]/20 focus:border-[#0866D9]"
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Logo URL</label>
                 <input
-                  type="url"
+                  type="text"
                   value={newCompanyLogo}
                   onChange={(e) => setNewCompanyLogo(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200"
+                  placeholder="https://example.com/logo.png"
+                  className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0866D9]/20 focus:border-[#0866D9]"
                 />
               </div>
               <button
                 type="submit"
-                disabled={createCompanyMutation.isPending}
-                className="w-full py-2.5 bg-[#0866D9] text-white font-semibold text-xs rounded-xl hover:bg-blue-700 transition-colors"
+                disabled={createCompanyMutation.isPending || !newCompanyName.trim()}
+                className="w-full py-2.5 bg-[#0866D9] text-white font-semibold text-xs rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
-                Add Company
+                {createCompanyMutation.isPending ? (
+                  <span>Adding Company...</span>
+                ) : (
+                  <span>Add Company</span>
+                )}
               </button>
             </form>
           </div>
@@ -382,7 +434,21 @@ export const AdminDashboardPage: React.FC = () => {
             <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {companies?.map((c) => (
                 <div key={c.id} className="p-3 border border-slate-100 rounded-xl flex items-center gap-3">
-                  {c.logoUrl && <img src={c.logoUrl} alt={c.name} className="w-10 h-10 object-contain shrink-0" />}
+                  {c.logoUrl ? (
+                    <img
+                      src={c.logoUrl}
+                      alt={c.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.style.display = 'none';
+                      }}
+                      className="w-10 h-10 object-contain shrink-0 rounded"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded bg-blue-50 text-[#0866D9] flex items-center justify-center font-bold text-xs shrink-0">
+                      {c.name.slice(0, 2).toUpperCase()}
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <h4 className="font-semibold text-xs text-slate-900 truncate">{c.name}</h4>
                     <span className="text-[10px] text-slate-500 block truncate">{c.industry || 'Corporate'}</span>
