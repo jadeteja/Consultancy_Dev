@@ -74,11 +74,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception processing request {}: ", request.getRequestURI(), ex);
+        String detailedMsg = ex.getMessage() != null && !ex.getMessage().isBlank() 
+                ? ex.getMessage() 
+                : "An unexpected error occurred. Please contact support.";
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 ErrorResponse.builder()
                         .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .error("Internal Server Error")
-                        .message("An unexpected error occurred. Please contact support.")
+                        .message(detailedMsg)
                         .path(request.getRequestURI())
                         .build()
         );

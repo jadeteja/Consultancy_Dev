@@ -59,8 +59,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/job-categories").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/site-settings/public").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/applications/guest-intent").permitAll()
-                // Company creation by authorized staff
+                // Company management by authorized staff
                 .requestMatchers(HttpMethod.POST, "/api/v1/companies").hasAnyRole("RECRUITER", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/companies/**").hasAnyRole("RECRUITER", "SUPER_ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/companies/**").hasRole("SUPER_ADMIN")
                 // Role-specific protected endpoints
                 .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/recruiter/**").hasAnyRole("RECRUITER", "SUPER_ADMIN")
