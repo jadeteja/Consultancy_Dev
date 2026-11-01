@@ -25,6 +25,8 @@ services:
         sync: false
       - key: SUPABASE_JWKS_URL
         sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
       - key: FRONTEND_URL
         sync: false
       - key: CONSULTANCY_WHATSAPP_NUMBER
