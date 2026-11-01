@@ -31,7 +31,7 @@ export const AdminDashboardPage: React.FC = () => {
     queryKey: ['companies'],
     queryFn: async () => {
       const res = await apiClient.get('/companies');
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     },
   });
 

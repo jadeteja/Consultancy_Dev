@@ -2,12 +2,11 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy pom.xml and pre-fetch dependencies for caching
+# Copy pom.xml and source code
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source code and build executable jar
 COPY src ./src
+
+# Build executable jar without running tests during image build
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime container

@@ -30,7 +30,7 @@ INSERT INTO jobs (
     salary_period, currency, vacancies, description, responsibilities, requirements, benefits,
     application_deadline, status
 ) VALUES (
-    'j0000000-0000-0000-0000-000000000001',
+    'a0000000-0000-0000-0000-000000000001',
     'JOB-1024',
     'software-developer-hyderabad-1024',
     'Software Developer',
@@ -59,12 +59,12 @@ INSERT INTO jobs (
 
 -- Skills for Job 1
 INSERT INTO job_skills (job_id, skill_name) VALUES
-('j0000000-0000-0000-0000-000000000001', 'Java'),
-('j0000000-0000-0000-0000-000000000001', 'Spring Boot'),
-('j0000000-0000-0000-0000-000000000001', 'React'),
-('j0000000-0000-0000-0000-000000000001', 'REST API'),
-('j0000000-0000-0000-0000-000000000001', 'SQL'),
-('j0000000-0000-0000-0000-000000000001', 'Git')
+('a0000000-0000-0000-0000-000000000001', 'Java'),
+('a0000000-0000-0000-0000-000000000001', 'Spring Boot'),
+('a0000000-0000-0000-0000-000000000001', 'React'),
+('a0000000-0000-0000-0000-000000000001', 'REST API'),
+('a0000000-0000-0000-0000-000000000001', 'SQL'),
+('a0000000-0000-0000-0000-000000000001', 'Git')
 ON CONFLICT (job_id, skill_name) DO NOTHING;
 
 -- Job 2: IT - Business Analyst (Infosys)
@@ -74,7 +74,7 @@ INSERT INTO jobs (
     salary_period, currency, vacancies, description, responsibilities, requirements, benefits,
     application_deadline, status
 ) VALUES (
-    'j0000000-0000-0000-0000-000000000002',
+    'a0000000-0000-0000-0000-000000000002',
     'JOB-1025',
     'business-analyst-pune-1025',
     'Business Analyst',
@@ -102,10 +102,10 @@ INSERT INTO jobs (
 ) ON CONFLICT (job_code) DO NOTHING;
 
 INSERT INTO job_skills (job_id, skill_name) VALUES
-('j0000000-0000-0000-0000-000000000002', 'SQL'),
-('j0000000-0000-0000-0000-000000000002', 'Data Analysis'),
-('j0000000-0000-0000-0000-000000000002', 'Reporting'),
-('j0000000-0000-0000-0000-000000000002', 'Excel')
+('a0000000-0000-0000-0000-000000000002', 'SQL'),
+('a0000000-0000-0000-0000-000000000002', 'Data Analysis'),
+('a0000000-0000-0000-0000-000000000002', 'Reporting'),
+('a0000000-0000-0000-0000-000000000002', 'Excel')
 ON CONFLICT (job_id, skill_name) DO NOTHING;
 
 -- Job 3: Non-IT - HR Executive (Wipro)
@@ -115,7 +115,7 @@ INSERT INTO jobs (
     salary_period, currency, vacancies, description, responsibilities, requirements, benefits,
     application_deadline, status
 ) VALUES (
-    'j0000000-0000-0000-0000-000000000003',
+    'a0000000-0000-0000-0000-000000000003',
     'JOB-1026',
     'hr-executive-hyderabad-1026',
     'HR Executive',
@@ -143,10 +143,10 @@ INSERT INTO jobs (
 ) ON CONFLICT (job_code) DO NOTHING;
 
 INSERT INTO job_skills (job_id, skill_name) VALUES
-('j0000000-0000-0000-0000-000000000003', 'Recruitment'),
-('j0000000-0000-0000-0000-000000000003', 'Communication'),
-('j0000000-0000-0000-0000-000000000003', 'MS Office'),
-('j0000000-0000-0000-0000-000000000003', 'Sourcing')
+('a0000000-0000-0000-0000-000000000003', 'Recruitment'),
+('a0000000-0000-0000-0000-000000000003', 'Communication'),
+('a0000000-0000-0000-0000-000000000003', 'MS Office'),
+('a0000000-0000-0000-0000-000000000003', 'Sourcing')
 ON CONFLICT (job_id, skill_name) DO NOTHING;
 
 -- Job 4: Semi-IT - Process Associate (Accenture)
@@ -156,7 +156,7 @@ INSERT INTO jobs (
     salary_period, currency, vacancies, description, responsibilities, requirements, benefits,
     application_deadline, status
 ) VALUES (
-    'j0000000-0000-0000-0000-000000000004',
+    'a0000000-0000-0000-0000-000000000004',
     'JOB-1027',
     'process-associate-chennai-1027',
     'Process Associate',
@@ -184,9 +184,9 @@ INSERT INTO jobs (
 ) ON CONFLICT (job_code) DO NOTHING;
 
 INSERT INTO job_skills (job_id, skill_name) VALUES
-('j0000000-0000-0000-0000-000000000004', 'Customer Support'),
-('j0000000-0000-0000-0000-000000000004', 'Process'),
-('j0000000-0000-0000-0000-000000000004', 'Communication')
+('a0000000-0000-0000-0000-000000000004', 'Customer Support'),
+('a0000000-0000-0000-0000-000000000004', 'Process'),
+('a0000000-0000-0000-0000-000000000004', 'Communication')
 ON CONFLICT (job_id, skill_name) DO NOTHING;
 
 -- Job 5: Non-IT - Operations Executive (HCL Technologies)
@@ -196,7 +196,7 @@ INSERT INTO jobs (
     salary_period, currency, vacancies, description, responsibilities, requirements, benefits,
     application_deadline, status
 ) VALUES (
-    'j0000000-0000-0000-0000-000000000005',
+    'a0000000-0000-0000-0000-000000000005',
     'JOB-1028',
     'operations-executive-bangalore-1028',
     'Operations Executive',
@@ -224,7 +224,7 @@ INSERT INTO jobs (
 ) ON CONFLICT (job_code) DO NOTHING;
 
 INSERT INTO job_skills (job_id, skill_name) VALUES
-('j0000000-0000-0000-0000-000000000005', 'Operations'),
-('j0000000-0000-0000-0000-000000000005', 'MIS'),
-('j0000000-0000-0000-0000-000000000005', 'Reporting')
+('a0000000-0000-0000-0000-000000000005', 'Operations'),
+('a0000000-0000-0000-0000-000000000005', 'MIS'),
+('a0000000-0000-0000-0000-000000000005', 'Reporting')
 ON CONFLICT (job_id, skill_name) DO NOTHING;

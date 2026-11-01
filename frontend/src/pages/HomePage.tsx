@@ -33,7 +33,7 @@ export const HomePage: React.FC = () => {
     queryKey: ['companies'],
     queryFn: async () => {
       const res = await apiClient.get('/companies');
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     },
   });
 
@@ -222,7 +222,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Top Hiring Companies */}
-      {companies && companies.length > 0 && (
+      {Array.isArray(companies) && companies.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-xl mx-auto mb-8">
             <h2 className="text-2xl font-bold text-[#102A56]">Top Hiring Corporates</h2>
