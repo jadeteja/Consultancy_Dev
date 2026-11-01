@@ -84,6 +84,19 @@ public class SupabaseJwtAuthenticationConverter implements Converter<Jwt, Abstra
             return userRepository.save(newUser);
         });
 
+        // Ensure user whose email matches defaultAdminEmail always has ROLE_SUPER_ADMIN
+        if (finalEmail != null && finalEmail.equalsIgnoreCase(defaultAdminEmail)) {
+            boolean hasSuperAdmin = user.getRoles().stream()
+                    .anyMatch(r -> r.getName() == RoleType.ROLE_SUPER_ADMIN);
+            if (!hasSuperAdmin) {
+                log.info("Upgrading user {} with email {} to ROLE_SUPER_ADMIN", user.getId(), finalEmail);
+                Role adminRole = roleRepository.findByName(RoleType.ROLE_SUPER_ADMIN)
+                        .orElseGet(() -> roleRepository.save(Role.builder().name(RoleType.ROLE_SUPER_ADMIN).build()));
+                user.getRoles().add(adminRole);
+                user = userRepository.save(user);
+            }
+        }
+
         if (!Boolean.TRUE.equals(user.getIsActive())) {
             throw new DisabledException("User profile is suspended or disabled");
         }

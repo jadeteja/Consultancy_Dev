@@ -32,14 +32,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setRoles([]);
       return;
     }
+    const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'nextstepsolutions.recruitment@gmail.com').toLowerCase();
+    const isAdmin = u.email?.toLowerCase() === adminEmail;
+
     try {
       const res = await apiClient.get('/candidate/profile');
       if (res.data?.userProfile?.roles) {
         const extractedRoles = res.data.userProfile.roles.map((r: { name: string }) => r.name);
+        if (isAdmin && !extractedRoles.includes('ROLE_SUPER_ADMIN')) {
+          extractedRoles.push('ROLE_SUPER_ADMIN');
+        }
         setRoles(extractedRoles);
+        return;
       }
     } catch {
-      // Default to candidate role if not populated yet
+      // Backend request might be waking up or cold starting
+    }
+
+    if (isAdmin) {
+      setRoles(['ROLE_SUPER_ADMIN', 'ROLE_CANDIDATE']);
+    } else {
       setRoles(['ROLE_CANDIDATE']);
     }
   };
@@ -76,6 +88,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const hasRole = (role: string) => {
+    const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || 'nextstepsolutions.recruitment@gmail.com').toLowerCase();
+    if (role === 'ROLE_SUPER_ADMIN' && user?.email?.toLowerCase() === adminEmail) {
+      return true;
+    }
     return roles.includes(role);
   };
 
