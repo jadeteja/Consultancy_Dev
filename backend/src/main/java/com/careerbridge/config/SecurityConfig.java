@@ -34,6 +34,9 @@ public class SecurityConfig {
     @Value("${supabase.jwt.jwks-url:}")
     private String jwksUrl;
 
+    @Value("${supabase.url:}")
+    private String supabaseUrl;
+
     @Value("${supabase.jwt.secret:}")
     private String jwtSecret;
 
@@ -76,8 +79,14 @@ public class SecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        if (jwksUrl != null && !jwksUrl.isBlank()) {
-            return NimbusJwtDecoder.withJwkSetUri(jwksUrl).build();
+        String effectiveJwksUrl = jwksUrl;
+        if ((effectiveJwksUrl == null || effectiveJwksUrl.isBlank() || effectiveJwksUrl.contains("xyzcompany.supabase.co")) 
+                && supabaseUrl != null && !supabaseUrl.isBlank() && !supabaseUrl.contains("xyzcompany.supabase.co")) {
+            effectiveJwksUrl = supabaseUrl.replaceAll("/+$", "") + "/auth/v1/.well-known/jwks.json";
+        }
+
+        if (effectiveJwksUrl != null && !effectiveJwksUrl.isBlank() && !effectiveJwksUrl.contains("xyzcompany.supabase.co")) {
+            return NimbusJwtDecoder.withJwkSetUri(effectiveJwksUrl).build();
         } else if (jwtSecret != null && !jwtSecret.isBlank()) {
             byte[] keyBytes;
             try {
@@ -89,9 +98,9 @@ public class SecurityConfig {
             SecretKeySpec secretKey = new SecretKeySpec(keyBytes, "HmacSHA256");
             return NimbusJwtDecoder.withSecretKey(secretKey).build();
         } else {
-            // Fallback mock decoder for dev/tests
-            SecretKeySpec secretKey = new SecretKeySpec("01234567890123456789012345678901".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            return NimbusJwtDecoder.withSecretKey(secretKey).build();
+            // Fallback to configured or direct project URL if available
+            String fallbackJwks = "https://jgdtzkfwymrgzdqapkiv.supabase.co/auth/v1/.well-known/jwks.json";
+            return NimbusJwtDecoder.withJwkSetUri(fallbackJwks).build();
         }
     }
 

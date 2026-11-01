@@ -36,10 +36,10 @@ spring:
 
 # Supabase Auth & JWT Configuration
 supabase:
-  url: ${SUPABASE_URL:https://xyzcompany.supabase.co}
+  url: ${SUPABASE_URL:https://jgdtzkfwymrgzdqapkiv.supabase.co}
   jwt:
-    issuer: ${SUPABASE_JWT_ISSUER:https://xyzcompany.supabase.co/auth/v1}
-    jwks-url: ${SUPABASE_JWKS_URL:https://xyzcompany.supabase.co/auth/v1/.well-known/jwks.json}
+    issuer: ${SUPABASE_JWT_ISSUER:https://jgdtzkfwymrgzdqapkiv.supabase.co/auth/v1}
+    jwks-url: ${SUPABASE_JWKS_URL:https://jgdtzkfwymrgzdqapkiv.supabase.co/auth/v1/.well-known/jwks.json}
     secret: ${SUPABASE_JWT_SECRET:}
   storage:
     bucket: ${SUPABASE_STORAGE_BUCKET:resumes}
