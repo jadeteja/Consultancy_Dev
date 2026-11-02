@@ -298,9 +298,9 @@ export const HomePage: React.FC = () => {
               <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-4 font-bold text-lg">
                 3
               </div>
-              <h4 className="font-bold text-slate-900 text-base mb-2">Free Candidate Placement</h4>
+              <h4 className="font-bold text-slate-900 text-base mb-2">Dedicated Career Guidance</h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Candidates never pay any fee or hidden charges. Our platform is 100% free for job seekers looking to build their future.
+                Over 100+ candidates successfully placed in 3 years. We guide you at every stage of the hiring journey.
               </p>
             </div>
           </div>

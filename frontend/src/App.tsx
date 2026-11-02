@@ -10,6 +10,8 @@ import { RegisterPage } from './pages/RegisterPage';
 import { CandidateDashboardPage } from './pages/CandidateDashboardPage';
 import { RecruiterDashboardPage } from './pages/RecruiterDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AboutPage } from './pages/AboutPage';
+import { ContactPage } from './pages/ContactPage';
 import { FloatingWhatsApp } from './components/shared/FloatingWhatsApp';
 import { useAuth } from './features/auth/AuthContext';
 
@@ -41,6 +43,8 @@ export const App: React.FC = () => {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/jobs" element={<JobListingsPage />} />
           <Route path="/jobs/:slug" element={<JobDetailsPage />} />
           <Route path="/login" element={<LoginPage />} />
